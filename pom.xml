@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.springframework.data.build</groupId>
-    <artifactId>spring-data-parent</artifactId>
+    <artifactId>spring-data-parent </artifactId>
     <version>1.9.5.RELEASE</version>
   </parent>
 
@@ -14,25 +14,25 @@
   <artifactId>spring-data-mybatis</artifactId>
   <version>1.0.17.RELEASE</version>
 
-  <name>Spring Data MyBatis</name>
-  <description>The primary goal of the Spring Data project is to make it easier to build
-    Spring-powered applications
-    that use data access technologies. This module deals with enhanced support for MyBatis based
+  <name>spring data mybatis</name>
+  <description>the primary goal of the spring data project is to make it easier to build
+    spring-powered applications
+    that use data access technologies. this module deals with enhanced support for mybatis based
     data access layers.
   </description>
   <url>https://github.com/hatunet/spring-data-mybatis</url>
   <developers>
     <developer>
       <id>jarvis</id>
-      <name>Jarvis Song</name>
+      <name>jarvis song</name>
       <email>iamjarvissong@gmail.com</email>
     </developer>
   </developers>
 
   <licenses>
     <license>
-      <name>Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <name>apache license, version 2.0</name>
+      <url>http://www.apache.org/licenses/license-2.0.txt</url>
     </license>
   </licenses>
 
@@ -44,7 +44,7 @@
   </scm>
 
   <properties>
-    <springdata.commons.version>1.13.5.RELEASE</springdata.commons.version>
+    <springdata.commons.version>1.13.5.release</springdata.commons.version>
     <mybatis.version>3.4.4</mybatis.version>
   </properties>
 
@@ -67,7 +67,7 @@
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
+            <artifactId>maven-javadoc-plugin </artifactId>
             <executions>
               <execution>
                 <phase>package</phase>
@@ -79,7 +79,7 @@
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
+            <artifactId>maven-gpg-plugin </artifactId>
             <executions>
               <execution>
                 <phase>verify</phase>
@@ -107,61 +107,61 @@
   <dependencies>
     <dependency>
       <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-commons</artifactId>
+      <artifactId>spring-data-commons </artifactId>
       <version>${springdata.commons.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
+      <artifactId>spring-context </artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
-      <artifactId>spring-orm</artifactId>
+      <artifactId>spring-orm </artifactId>
     </dependency>
     <dependency>
       <groupId>org.mybatis</groupId>
-      <artifactId>mybatis</artifactId>
+      <artifactId>mybatis </artifactId>
       <version>${mybatis.version}</version>
     </dependency>
     <dependency>
       <groupId>org.mybatis</groupId>
-      <artifactId>mybatis-spring</artifactId>
+      <artifactId>mybatis-spring </artifactId>
       <version>1.3.1</version>
     </dependency>
 
     <dependency>
       <groupId>com.querydsl</groupId>
-      <artifactId>querydsl-core</artifactId>
+      <artifactId>querydsl-core </artifactId>
       <version>4.1.4</version>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
+      <artifactId>h2 </artifactId>
       <version>1.4.194</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
+      <artifactId>mysql-connector-java </artifactId>
       <version>5.1.41</version>
       <scope>test</scope>
     </dependency>
     <!--<dependency>-->
     <!--<groupId>com.oracle</groupId>-->
-    <!--<artifactId>ojdbc14</artifactId>-->
+    <!--<artifactid>ojdbc14 </artifactId>-->
     <!--<version>10.2.0.4.0</version>-->
     <!--<scope>test</scope>-->
     <!--</dependency>-->
     <dependency>
       <groupId>net.sourceforge.jtds</groupId>
-      <artifactId>jtds</artifactId>
+      <artifactId>jtds </artifactId>
       <version>1.3.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
+      <artifactId>postgresql </artifactId>
       <version>9.4.1212</version>
       <scope>test</scope>
     </dependency>
@@ -170,15 +170,15 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
+        <artifactId>maven-assembly-plugin </artifactId>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
-        <artifactId>wagon-maven-plugin</artifactId>
+        <artifactId>wagon-maven-plugin </artifactId>
       </plugin>
       <plugin>
         <groupId>org.asciidoctor</groupId>
-        <artifactId>asciidoctor-maven-plugin</artifactId>
+        <artifactId>asciidoctor-maven-plugin </artifactId>
       </plugin>
     </plugins>
   </build>

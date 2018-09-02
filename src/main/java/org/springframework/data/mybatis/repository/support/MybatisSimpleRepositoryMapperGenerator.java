@@ -36,6 +36,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -454,6 +455,44 @@ public class MybatisSimpleRepositoryMapperGenerator {
         builder.append("</select>");
     }
 
+    private static class SimpleCondition implements Condition{
+        final String column;
+
+        SimpleCondition(String column) {
+            this.column = column;
+        }
+
+        @Override
+        public String column() {
+            return this.column;
+        }
+
+        @Override
+        public String[] properties() {
+            return new String[]{};
+        }
+
+        @Override
+        public String alias() {
+            return "";
+        }
+
+        @Override
+        public Type type() {
+            return Type.SIMPLE_PROPERTY;
+        }
+
+        @Override
+        public IgnoreCaseType ignoreCaseType() {
+            return IgnoreCaseType.NEVER;
+        }
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+            return Condition.class;
+        }
+    }
+
     private String buildCondition() {
         final StringBuilder builder = new StringBuilder();
         persistentEntity.doWithProperties(new PropertyHandler<MybatisPersistentProperty>() {
@@ -461,6 +500,12 @@ public class MybatisSimpleRepositoryMapperGenerator {
             public void doWithPersistentProperty(MybatisPersistentProperty property) {
                 Set<Condition> conditions = new HashSet<Condition>();
                 Condition cond = property.findAnnotation(Condition.class);
+                if (null == cond) {
+                    Column column = property.findAnnotation(Column.class);
+                    if (null != column) {
+                        cond = new SimpleCondition(column.name());
+                    }
+                }
                 if (null != cond) {
                     conditions.add(cond);
                 }

@@ -814,7 +814,6 @@ public class MybatisSimpleRepositoryMapperGenerator {
     private void buildInnerResultMap(final StringBuilder builder, final MybatisPersistentEntity<?> persistentEntity, final String prefix) {
 
         final StringBuilder constructorBuilder = new StringBuilder();
-        final StringBuilder resultBuilder = new StringBuilder();
 
         PreferredConstructor<?, MybatisPersistentProperty> persistenceConstructor = persistentEntity.getPersistenceConstructor();
         if (null != persistenceConstructor && persistenceConstructor.hasParameters()) {
@@ -859,11 +858,19 @@ public class MybatisSimpleRepositoryMapperGenerator {
                 }
             }
 
-
             constructorBuilder.append("</constructor>");
         }
 
+        builder.append(constructorBuilder).append(buildResultMapProperties(persistentEntity,prefix));
+    }
 
+    private StringBuilder buildResultMapProperties( final MybatisPersistentEntity<?> persistentEntity, final String prefix){
+        return buildResultMapProperties(persistentEntity,prefix,true)
+            .append(buildResultMapProperties(persistentEntity,prefix,false));
+    }
+
+    private StringBuilder buildResultMapProperties( final MybatisPersistentEntity<?> persistentEntity, final String prefix, final boolean forIdProperty){
+        final StringBuilder resultBuilder = new StringBuilder();
         persistentEntity.doWithProperties(new SimplePropertyHandler() {
             @Override
             public void doWithPersistentProperty(PersistentProperty<?> pp) {
@@ -872,24 +879,25 @@ public class MybatisSimpleRepositoryMapperGenerator {
                     return;
                 }
 
-
-                if (property.isIdProperty()) {
-                    buildInnerResultMapId(resultBuilder, property, prefix);
-                    return;
-                }
-                resultBuilder.append(String.format("<result property=\"%s\" column=\"%s\" javaType=\"%s\" jdbcType=\"%s\""
-                                + (null != property.getSpecifiedTypeHandler() ? (" typeHandler=\"" + property.getSpecifiedTypeHandler().getName() + "\"") : "")
-                                + " />",
+                if (forIdProperty) {
+                    if (property.isIdProperty()) {
+                        buildInnerResultMapId(resultBuilder, property, prefix);
+                    }
+                } else if (!property.isIdProperty()){
+                    resultBuilder.append(String.format(
+                        "<result property=\"%s\" column=\"%s\" javaType=\"%s\" jdbcType=\"%s\""
+                            + (null != property.getSpecifiedTypeHandler() ?
+                            (" typeHandler=\"" + property.getSpecifiedTypeHandler().getName()
+                                + "\"") : "") + " />",
                         property.getName(),
                         alias(prefix + property.getName()),
                         property.getActualType().getName(),
                         property.getJdbcType()
-                ));
+                    ));
+                }
             }
         });
-
-
-        builder.append(constructorBuilder).append(resultBuilder);
+        return resultBuilder;
     }
 
     private void buildInnerToOneAssociationResultMap(final StringBuilder builder, final PersistentProperty<? extends PersistentProperty<?>> inverse) {

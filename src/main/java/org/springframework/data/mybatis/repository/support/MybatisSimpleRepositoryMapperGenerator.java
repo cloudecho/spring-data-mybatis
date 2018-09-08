@@ -181,7 +181,6 @@ public class MybatisSimpleRepositoryMapperGenerator {
         return result;
     }
 
-
     private void buildUpdateSQL(final StringBuilder builder, String statementName, final boolean ignoreNull) {
         if (!persistentEntity.hasIdProperty()) {
             return;
@@ -194,7 +193,7 @@ public class MybatisSimpleRepositoryMapperGenerator {
             @Override
             public void doWithPersistentProperty(PersistentProperty<?> pp) {
                 MybatisPersistentProperty property = (MybatisPersistentProperty) pp;
-                if (property.isIdProperty()) {
+                if (property.isIdProperty() || !isColumn(property)) {
                     return;
                 }
 
@@ -720,7 +719,9 @@ public class MybatisSimpleRepositoryMapperGenerator {
                         return;
                     }
                 }
-                builder.append(dialect.wrapColumnName(property.getColumnName())).append(",");
+                if(isColumn(property)) {
+                    builder.append(dialect.wrapColumnName(property.getColumnName())).append(",");
+                }
             }
         });
 
@@ -780,6 +781,9 @@ public class MybatisSimpleRepositoryMapperGenerator {
                     if (property.getIdGenerationType() == IDENTITY || (property.getIdGenerationType() == AUTO && identityColumnSupport.supportsIdentityColumns())) {
                         return;
                     }
+                }
+                if(!isColumn(property)){
+                    return;
                 }
                 builder.append("#{").append(property.getName()).append(",jdbcType=").append(property.getJdbcType());
                 if (null != property.getSpecifiedTypeHandler()) {
@@ -928,7 +932,7 @@ public class MybatisSimpleRepositoryMapperGenerator {
                     if (property.isIdProperty()) {
                         buildInnerResultMapId(resultBuilder, property, prefix);
                     }
-                } else if (!property.isIdProperty()){
+                } else if (!property.isIdProperty() && isColumn(property)){
                     resultBuilder.append(String.format(
                         "<result property=\"%s\" column=\"%s\" javaType=\"%s\" jdbcType=\"%s\""
                             + (null != property.getSpecifiedTypeHandler() ?
@@ -1062,6 +1066,10 @@ public class MybatisSimpleRepositoryMapperGenerator {
 
     private String quota(String alias) {
         return dialect.openQuote() + alias + dialect.closeQuote();
+    }
+
+    private boolean isColumn(MybatisPersistentProperty property){
+        return property.isAnnotationPresent(Column.class);
     }
 
     /**

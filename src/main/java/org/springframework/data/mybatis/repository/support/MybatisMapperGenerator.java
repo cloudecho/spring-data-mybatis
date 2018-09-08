@@ -23,6 +23,7 @@ import org.springframework.data.mapping.Association;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.SimpleAssociationHandler;
 import org.springframework.data.mapping.SimplePropertyHandler;
+import org.springframework.data.mybatis.annotations.Column;
 import org.springframework.data.mybatis.mapping.*;
 import org.springframework.data.mybatis.repository.dialect.Dialect;
 import org.springframework.data.repository.query.parser.Part.IgnoreCaseType;
@@ -154,7 +155,8 @@ public class MybatisMapperGenerator {
                 }
                 builder.append(" in ");
                 break;
-
+            default:
+                break;
         }
         return builder.toString();
     }
@@ -166,7 +168,11 @@ public class MybatisMapperGenerator {
             @Override
             public void doWithPersistentProperty(PersistentProperty<?> pp) {
                 MybatisPersistentProperty property = (MybatisPersistentProperty) pp;
-                builder.append(quota(persistentEntity.getEntityName()) + "." + dialect.wrapColumnName(property.getColumnName())).append(" as ").append(quota(property.getName())).append(",");
+                if(property.isAnnotationPresent(Column.class)) {
+                    builder.append(quota(persistentEntity.getEntityName()) + "." + dialect
+                        .wrapColumnName(property.getColumnName())).append(" as ")
+                        .append(quota(property.getName())).append(",");
+                }
             }
         });
 

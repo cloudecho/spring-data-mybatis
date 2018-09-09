@@ -21,6 +21,7 @@ package org.springframework.data.mybatis.repository.support;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mybatis.domains.AuditDateAware;
 import org.springframework.data.mybatis.mapping.MybatisMappingContext;
 import org.springframework.data.mybatis.repository.dialect.Dialect;
@@ -64,8 +65,9 @@ public class MybatisRepositoryFactoryBean<T extends Repository<S, ID>, S, ID ext
         super.afterPropertiesSet();
     }
 
-    public void setMappingContext(MybatisMappingContext mappingContext) {
-        this.mappingContext = mappingContext;
+    @Override
+    public void setMappingContext(MappingContext<?, ?> mappingContext) {
+        this.mappingContext = (MybatisMappingContext) mappingContext;
         super.setMappingContext(mappingContext);
     }
 

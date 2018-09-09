@@ -24,6 +24,7 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.SimpleAssociationHandler;
 import org.springframework.data.mapping.SimplePropertyHandler;
 import org.springframework.data.mybatis.annotations.Column;
+import org.springframework.data.mybatis.annotations.Id;
 import org.springframework.data.mybatis.mapping.*;
 import org.springframework.data.mybatis.repository.dialect.Dialect;
 import org.springframework.data.repository.query.parser.Part.IgnoreCaseType;
@@ -46,9 +47,10 @@ public class MybatisMapperGenerator {
 
     private final Dialect                    dialect;
     private final MybatisPersistentEntity<?> persistentEntity;
+    private final MybatisMappingContext      context ;
 
-    public MybatisMapperGenerator(Dialect dialect, MybatisPersistentEntity<?> persistentEntity) {
-
+    public MybatisMapperGenerator(Dialect dialect, MybatisPersistentEntity<?> persistentEntity, MybatisMappingContext context) {
+        this.context = context;
         this.dialect = dialect;
         this.persistentEntity = persistentEntity;
     }
@@ -161,6 +163,12 @@ public class MybatisMapperGenerator {
         return builder.toString();
     }
 
+    private void buildSelectColumn(StringBuilder builder,MybatisPersistentProperty property){
+        builder.append(quota(persistentEntity.getEntityName()) + "." + dialect
+            .wrapColumnName(property.getColumnName())).append(" as ")
+            .append(quota(property.getName())).append(",");
+    }
+
     public String buildSelectColumns(final boolean basic) {
         final StringBuilder builder = new StringBuilder();
 
@@ -169,9 +177,16 @@ public class MybatisMapperGenerator {
             public void doWithPersistentProperty(PersistentProperty<?> pp) {
                 MybatisPersistentProperty property = (MybatisPersistentProperty) pp;
                 if(property.isAnnotationPresent(Column.class)) {
-                    builder.append(quota(persistentEntity.getEntityName()) + "." + dialect
-                        .wrapColumnName(property.getColumnName())).append(" as ")
-                        .append(quota(property.getName())).append(",");
+                    buildSelectColumn(builder, property);
+                }else if (property.isAnnotationPresent(Id.class) && property.findAnnotation(Id.class).composite()) {
+                    // composite key
+                    MybatisPersistentEntityImpl<?> idEntity = context.getPersistentEntity(property.getActualType());
+                    idEntity.doWithProperties(new SimplePropertyHandler() {
+                        @Override
+                        public void doWithPersistentProperty(PersistentProperty<?> property) {
+                            buildSelectColumn(builder, (MybatisPersistentProperty) property);
+                        }
+                    });
                 }
             }
         });

@@ -81,7 +81,7 @@ public class PartTreeMybatisQuery extends AbstractMybatisQuery {
         this.tree = new PartTree(method.getName(), domainClass);
         this.parameters = method.getParameters();
         this.persistentEntity = context.getPersistentEntity(domainClass);
-        this.generator = new MybatisMapperGenerator(dialect, persistentEntity);
+        this.generator = new MybatisMapperGenerator(dialect, persistentEntity, context);
         this.statementName = super.getStatementName() + UUID.randomUUID().toString().replace("-", "");
 
         doCreateQueryStatement(method); // prepare mybatis statement.

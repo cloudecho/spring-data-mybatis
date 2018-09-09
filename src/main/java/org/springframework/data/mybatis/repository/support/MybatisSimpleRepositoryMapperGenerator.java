@@ -68,7 +68,7 @@ public class MybatisSimpleRepositoryMapperGenerator {
         this.domainClass = domainClass;
         this.persistentEntity = context.getPersistentEntity(domainClass);
 
-        this.generator = new MybatisMapperGenerator(dialect, persistentEntity);
+        this.generator = new MybatisMapperGenerator(dialect, persistentEntity, context);
     }
 
 

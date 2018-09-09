@@ -456,9 +456,15 @@ public class MybatisSimpleRepositoryMapperGenerator {
 
     private static class SimpleCondition implements Condition{
         final String column;
+        final String[] properties;
 
         SimpleCondition(String column) {
+            this(column, new String[0]);
+        }
+
+        SimpleCondition(String column, String[] properties) {
             this.column = column;
+            this.properties = properties;
         }
 
         @Override
@@ -468,7 +474,7 @@ public class MybatisSimpleRepositoryMapperGenerator {
 
         @Override
         public String[] properties() {
-            return new String[]{};
+            return properties;
         }
 
         @Override
@@ -492,6 +498,22 @@ public class MybatisSimpleRepositoryMapperGenerator {
         }
     }
 
+    private void buildConditionWithCompositeKey(final Set<Condition> conditions, final MybatisPersistentProperty property0) {
+        if(property0.isAnnotationPresent(Id.class) && property0.findAnnotation(Id.class).composite()){
+            // composite key
+            MybatisPersistentEntityImpl<?> idEntity = context.getPersistentEntity(property0.getActualType());
+            idEntity.doWithProperties(new SimplePropertyHandler() {
+                @Override
+                public void doWithPersistentProperty(PersistentProperty<?> property) {
+                    Column column = property.findAnnotation(Column.class);
+                    if (null != column) {
+                        conditions.add(new SimpleCondition(column.name(), new String[]{property.getName()}));
+                    }
+                }
+            });
+        }
+    }
+
     private String buildCondition() {
         final StringBuilder builder = new StringBuilder();
         persistentEntity.doWithProperties(new PropertyHandler<MybatisPersistentProperty>() {
@@ -512,6 +534,7 @@ public class MybatisSimpleRepositoryMapperGenerator {
                 if (null != conds && null != conds.value() && conds.value().length > 0) {
                     conditions.addAll(Arrays.asList(conds.value()));
                 }
+                buildConditionWithCompositeKey(conditions, property);
                 if (conditions.isEmpty()) {
                     return;
                 }

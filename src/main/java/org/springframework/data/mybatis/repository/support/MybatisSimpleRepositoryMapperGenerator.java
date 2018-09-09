@@ -40,6 +40,12 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.springframework.data.mybatis.annotations.Id.GenerationType.*;
 
@@ -48,7 +54,7 @@ import static org.springframework.data.mybatis.annotations.Id.GenerationType.*;
  *
  * @author Jarvis Song
  */
-public class MybatisSimpleRepositoryMapperGenerator {
+public class MybatisSimpleRepositoryMapperGenerator implements Runnable{
     private transient static final Logger logger = LoggerFactory.getLogger(MybatisSimpleRepositoryMapperGenerator.class);
     private static final String MAPPER_BEGIN = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">";
@@ -71,8 +77,24 @@ public class MybatisSimpleRepositoryMapperGenerator {
         this.generator = new MybatisMapperGenerator(dialect, persistentEntity, context);
     }
 
+    private static final ExecutorService EXECUTOR = new ThreadPoolExecutor(0, 2, 60L, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(), new ThreadFactory() {
+        final AtomicInteger counter = new AtomicInteger(0);
 
-    public void generate() {
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            t.setName("mybatis-mapper-generator-" + counter.getAndIncrement());
+            return t;
+        }
+    });
+
+    public void generate(){
+        EXECUTOR.submit(this);
+    }
+
+    @Override
+    public void run() {
         if (null == persistentEntity) {
             logger.warn("Could not find persistent entity for domain: " + domainClass + " from mapping context.");
             return;
@@ -81,12 +103,13 @@ public class MybatisSimpleRepositoryMapperGenerator {
         String namespace = domainClass.getName();
         try {
             xml = render();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new MappingException("create auto mapping error for " + namespace, e);
         }
         if (logger.isDebugEnabled()) {
             logger.debug("\n******************* Auto Generate MyBatis Mapping XML (" + namespace + ") *******************\n" + xml);
         }
+        logger.info("Render mapping XML for {} done", namespace);
         InputStream inputStream = null;
         try {
             inputStream = new ByteArrayInputStream(xml.getBytes("UTF-8"));
@@ -108,7 +131,22 @@ public class MybatisSimpleRepositoryMapperGenerator {
         }
     }
 
-    private String render() throws IOException {
+    // Suppose 10 seconds is enough
+    private static final int WAIT_FOR_PERSISTENT_ENTITY_SECONDS = 10;
+
+    private String render() throws IOException, InterruptedException {
+        int waitCount = 0;
+        synchronized (persistentEntity) {
+            while (waitCount++ < WAIT_FOR_PERSISTENT_ENTITY_SECONDS && !persistentEntity.isCompleted()) {
+                logger.info("Waiting for {} to create completely", persistentEntity.getName());
+                persistentEntity.wait(1000);
+            }
+        }
+        if(!persistentEntity.isCompleted()) {
+           logger.error("Cannot render mapping XML due to the persistentEntity \"{}\" not completed in {} seconds",
+               persistentEntity.getName(), WAIT_FOR_PERSISTENT_ENTITY_SECONDS);
+           throw new RuntimeException("Cannot render mapping XML for " + persistentEntity.getName());
+        }
 
         StringBuilder builder = new StringBuilder();
         builder.append(MAPPER_BEGIN);

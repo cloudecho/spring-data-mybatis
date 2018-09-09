@@ -18,6 +18,8 @@
 
 package org.springframework.data.mybatis.mapping;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.SimplePropertyHandler;
 import org.springframework.data.mapping.model.BasicPersistentEntity;
@@ -33,7 +35,7 @@ import java.util.Comparator;
  */
 public class MybatisPersistentEntityImpl<T> extends BasicPersistentEntity<T, MybatisPersistentProperty>
         implements MybatisPersistentEntity<T> {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(MybatisPersistentEntityImpl.class);
 
     private final MybatisMappingContext context;
 
@@ -47,6 +49,21 @@ public class MybatisPersistentEntityImpl<T> extends BasicPersistentEntity<T, Myb
     public MybatisPersistentEntityImpl(MybatisMappingContext context, TypeInformation<T> information, Comparator<MybatisPersistentProperty> comparator) {
         super(information, comparator);
         this.context = context;
+    }
+
+    private volatile boolean completed = false;
+
+    @Override
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    @Override
+    public synchronized void verify() {
+        super.verify();
+        this.completed = true;
+        LOGGER.info("Create PersistentEntity {} done", getName());
+        this.notifyAll();
     }
 
     @Override

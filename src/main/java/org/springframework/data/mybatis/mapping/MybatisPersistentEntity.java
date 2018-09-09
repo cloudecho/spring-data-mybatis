@@ -35,5 +35,8 @@ public interface MybatisPersistentEntity<T> extends PersistentEntity<T, MybatisP
 
     MybatisPersistentProperty findByColumnName(String columnName);
 
-
+    /**
+     * Check if entity-creation completed
+     */
+    boolean isCompleted();
 }

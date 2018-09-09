@@ -163,7 +163,7 @@ public class MybatisMapperGenerator {
         return builder.toString();
     }
 
-    private void buildSelectColumn(StringBuilder builder,MybatisPersistentProperty property){
+    private void buildSelectColumn(StringBuilder builder, MybatisPersistentProperty property){
         builder.append(quota(persistentEntity.getEntityName()) + "." + dialect
             .wrapColumnName(property.getColumnName())).append(" as ")
             .append(quota(property.getName())).append(",");

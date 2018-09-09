@@ -402,7 +402,8 @@ public class MybatisSimpleRepositoryMapperGenerator {
                 idEntity.doWithProperties(new PropertyHandler<MybatisPersistentProperty>() {
                     @Override
                     public void doWithPersistentProperty(MybatisPersistentProperty property) {
-                        builder.append("and ").append(dialect.wrapColumnName(property.getColumnName())).append("=#{" + idProperty.getName() + "." + property.getName() + "}");
+                        builder.append("and ").append(dialect.wrapColumnName(property.getColumnName()))
+                            .append("=#{" + property.getName() + "}");
 
                     }
                 });

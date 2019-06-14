@@ -15,26 +15,31 @@
  */
 package org.springframework.data.mybatis.repository.sample;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Stream;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mybatis.domain.sample.Role;
 import org.springframework.data.mybatis.domain.sample.User;
-import org.springframework.data.mybatis.repository.MyBatisRepository;
+import org.springframework.data.mybatis.repository.DataSource;
+import org.springframework.data.mybatis.repository.Modifying;
+import org.springframework.data.mybatis.repository.MybatisRepository;
+import org.springframework.data.mybatis.repository.Query;
+import org.springframework.data.mybatis.repository.SelectColumns;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * Repository interface for {@code User}s.
  */
-public interface UserRepository extends MyBatisRepository<User, Integer>, UserRepositoryCustom {
+@DataSource("ds2")
+@Transactional(readOnly = true)
+public interface UserRepository
+		extends MybatisRepository<User, Integer>, UserRepositoryCustom {
 
 	@Override
 	User getById(Integer integer);
@@ -44,29 +49,32 @@ public interface UserRepository extends MyBatisRepository<User, Integer>, UserRe
 	@Transactional
 	java.util.Optional<User> findById(Integer primaryKey);
 
+	@Transactional
+	@Modifying
+	@Query("delete from ds_user where id = ?1")
 	void deleteById(Integer id);
 
-	User findByEmailAddress(String emailAddress);
+	@Query(statement = "search_by_email")
+	User findByEmailAddress(@Param("emailAddress") String emailAddress);
 
 	User findByEmailAddressAndLastname(String emailAddress, String lastname);
 
-	List<User> findByEmailAddressAndLastnameOrFirstname(String emailAddress, String lastname, String username);
+	List<User> findByEmailAddressAndLastnameOrFirstname(String emailAddress,
+			String lastname, String username);
 
-	// @Modifying
-	// @Query("update ds_user u set u.lastname = ?1")
-	// void renameAllUsersTo(String lastname);
+	@Transactional
+	@Modifying
+	@Query("update ds_user set lastname=:lastname")
+	void renameAllUsersTo(@Param("lastname") String lastname);
 
-	List<User> findByFirstnameOrLastname(@Param("lastname") String lastname, @Param("firstname") String firstname);
+	List<User> findByFirstnameOrLastname(@Param("lastname") String lastname,
+			@Param("firstname") String firstname);
 
 	List<User> findByLastnameLikeOrderByFirstnameDesc(String lastname);
 
 	List<User> findByLastnameNotLike(String lastname);
 
 	List<User> findByLastnameNot(String lastname);
-
-	List<User> findByManagerLastname(String name);
-
-	List<User> findByColleaguesLastname(String lastname);
 
 	List<User> findByLastnameNotNull();
 
@@ -80,7 +88,8 @@ public interface UserRepository extends MyBatisRepository<User, Integer>, UserRe
 
 	List<User> findByLastnameIgnoringCaseLike(String lastname);
 
-	List<User> findByLastnameAndFirstnameAllIgnoringCase(String lastname, String firstname);
+	List<User> findByLastnameAndFirstnameAllIgnoringCase(String lastname,
+			String firstname);
 
 	List<User> findByAgeGreaterThanEqual(int age);
 
@@ -122,8 +131,6 @@ public interface UserRepository extends MyBatisRepository<User, Integer>, UserRe
 
 	Slice<User> findSliceByLastname(String lastname, Pageable pageable);
 
-	List<User> findByAttributesIn(Set<String> attributes);
-
 	Long removeByLastname(String lastname);
 
 	List<User> deleteByLastname(String lastname);
@@ -156,20 +163,28 @@ public interface UserRepository extends MyBatisRepository<User, Integer>, UserRe
 
 	List<User> findByAgeIn(Collection<Integer> ages);
 
+	@SelectColumns("id,lastname")
 	List<User> queryByAgeIn(Integer[] ages);
 
 	List<User> queryByAgeInOrFirstname(Integer[] ages, String firstname);
 
 	List<User> findByLastnameNotContaining(String part);
 
-	List<User> findByRolesContaining(Role role);
-
-	List<User> findByRolesNotContaining(Role role);
-
-	List<User> findByRolesNameContaining(String name);
-
 	<T> Stream<T> findAsStreamByFirstnameLike(String name, Class<T> projectionType);
 
 	<T> List<T> findAsListByFirstnameLike(String name, Class<T> projectionType);
+
+	@DataSource("ds3")
+	@Query("select firstname from ds_user where lastname = ?1 limit 1")
+	String getFirstnameByLastname(String lastname);
+
+	@Query("select id from ds_user where firstname = ?1 limit 1")
+	Integer getUserIdByFirstname(String firstname);
+
+	@Query("select firstname from ds_user where lastname in ?1 order by firstname asc")
+	List<String> findFirstnamesInLastnames(String... lastnames);
+
+	@Query("select firstname from ds_user where lastname like %?1% order by firstname asc")
+	List<String> findFirstnamesByLastnamesLike(String lastname);
 
 }

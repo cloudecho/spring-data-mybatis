@@ -5,10 +5,17 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.data.build</groupId>
+        <artifactId>spring-data-parent</artifactId>
+        <version>2.1.8.RELEASE</version>
+    </parent>
+
     <groupId>com.ifrabbit</groupId>
     <artifactId>spring-data-mybatis-build</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
+
     <name>Spring Data MyBatis Build</name>
     <description>Spring Data module for MyBatis repositories.</description>
     <url>https://github.com/hatunet/spring-data-mybatis</url>
@@ -37,7 +44,7 @@
         <maven>3.5</maven>
     </prerequisites>
     <properties>
-        <revision>2.0.0.BUILD-SNAPSHOT</revision>
+        <revision>2.1.0.BUILD-SNAPSHOT</revision>
 
     </properties>
     <modules>
@@ -47,38 +54,7 @@
         <module>spring-data-mybatis-boot-starter</module>
     </modules>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.0.1</version>
-                <configuration>
-                    <updatePomFile>true</updatePomFile>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>flatten</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>flatten</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>flatten.clean</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
     <profiles>
-
-        <!-- Common release setup -->
-
         <profile>
             <id>release</id>
             <build>
@@ -98,7 +74,7 @@
                                 <configuration>
                                     <rules>
                                         <requireJavaVersion>
-                                            <version>[1.8,1.9)</version>
+                                            <version>[1.8,12)</version>
                                         </requireJavaVersion>
                                         <requireReleaseDeps/>
                                         <requireReleaseVersion/>
@@ -142,7 +118,7 @@
                             <version>1.6.7</version>
                             <extensions>true</extensions>
                             <configuration>
-                                <serverId>sonatype</serverId>
+                                <serverId>oss</serverId>
                                 <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                                 <autoReleaseAfterClose>false</autoReleaseAfterClose>
                             </configuration>
@@ -163,44 +139,9 @@
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                     </plugin>
 
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.10.4</version>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <encoding>UTF-8</encoding>
-                            <charset>UTF-8</charset>
-                            <additionalJOptions>
-                                <additionalJOption>-Xdoclint:none</additionalJOption>
-                            </additionalJOptions>
-                        </configuration>
-                    </plugin>
-
                 </plugins>
 
             </build>
-
             <distributionManagement>
                 <snapshotRepository>
                     <id>oss</id>
@@ -215,25 +156,4 @@
         </profile>
     </profiles>
 
-    <repositories>
-        <repository>
-            <id>sonatype-oss-snapshots</id>
-            <name>Sonatype OSS Snapshots Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>spring-libs-snapshot</id>
-            <url>https://repo.spring.io/libs-snapshot</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>spring-plugins-release</id>
-            <url>https://repo.spring.io/plugins-release</url>
-        </pluginRepository>
-    </pluginRepositories>
 </project>

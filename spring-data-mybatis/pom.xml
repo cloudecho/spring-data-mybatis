@@ -13,7 +13,28 @@
     <artifactId>spring-data-mybatis</artifactId>
     <name>Spring Data MyBatis</name>
     <description>Spring Data module for MyBatis repositories.</description>
+    <url>https://github.com/hatunet/spring-data-mybatis</url>
+    <developers>
+        <developer>
+            <id>jarvis</id>
+            <name>Jarvis Song</name>
+            <email>iamjarvissong@gmail.com</email>
+        </developer>
+    </developers>
 
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/hatunet/spring-data-mybatis</url>
+        <connection>scm:git:git://github.com/hatunet/spring-data-mybatis.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/hatunet/spring-data-mybatis.git
+        </developerConnection>
+    </scm>
     <properties>
     </properties>
 
@@ -36,6 +57,13 @@
             <artifactId>mybatis-spring</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.2</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
@@ -46,6 +74,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-instrument</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.querydsl</groupId>
@@ -65,9 +98,14 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>${jodatime}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.196</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

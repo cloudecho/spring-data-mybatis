@@ -1,10 +1,10 @@
 # Spring Data MyBatis 
 [![Build Status](https://travis-ci.org/hatunet/spring-data-mybatis.svg?branch=master)](https://travis-ci.org/hatunet/spring-data-mybatis)   [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/spring-data-mybatis)
-                                                                                                                                                                 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.ifrabbit/spring-data-mybatis/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.ifrabbit/spring-data-mybatis)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache_2.0-brightgreen.svg)](https://github.com/hatunet/spring-data-mybatis/blob/master/LICENSE)                                                                                                                                                                 
 
 
-
-[Simplified Chinese](README_zh.md)
+[1.x Document](README_1.x.md)
 
 The primary goal of the Spring Data project is to make it easier to build Spring-powered applications that use data access technologies. 
 This module deals with enhanced support for MyBatis based data access layers.
@@ -19,10 +19,11 @@ This module deals with enhanced support for MyBatis based data access layers.
 * Possibility to integrate custom repository code
 * Easy Spring integration with custom namespace
 * Support MySQL, Oracle, Sql Server, H2, etc.
+* Support SpringBoot 2.x
+
 
 
 ## Getting Help ##
-This README as well as the [reference documentation](https://hatunet.github.io/spring-data-mybatis/) are the best places to start learning about Spring Data MyBatis. 
 
 If you have any question, please record a [issue](https://github.com/hatunet/spring-data-mybatis/issues) to me.
 
@@ -35,35 +36,18 @@ Download the jar through Maven:
 <dependency>
   <groupId>com.ifrabbit</groupId>
   <artifactId>spring-data-mybatis</artifactId>
-  <version>1.0.17.RELEASE</version>
+  <version>2.0.0.RELEASE</version>
 </dependency>
-```
-
-If you want use snapshot version , you can download the jar through maven:
-```xml
-<dependency>
-  <groupId>com.ifrabbit</groupId>
-  <artifactId>spring-data-mybatis</artifactId>
-  <version>2.0.0.BUILD-SNAPSHOT</version>
-</dependency>
-```
-
-but you should add repository configuration to your pom.xml like this:
-
-```xml
-<repository>
- <id>oss-snapshots-repo</id>
- <url>https://oss.sonatype.org/content/repositories/snapshots</url>
- <releases><enabled>false</enabled></releases>
- <snapshots><enabled>true</enabled></snapshots>
-</repository>
 ```
 
 
 The simple Spring Data Mybatis configuration with Java-Config looks like this: 
 ```java
 @Configuration
-@EnableMybatisRepositories
+@EnableMybatisRepositories(
+        value = "org.springframework.data.mybatis.repository.sample",
+        mapperLocations = "classpath*:/org/springframework/data/mybatis/repository/sample/mappers/*Mapper.xml"
+)
 public class TestConfig {
 
     @Bean
@@ -91,23 +75,37 @@ Create an entity:
 
 ```java
 @Entity
+@Table(name = "user")
 public class User extends LongId {
 
+  
+  @Condition
   private String firstname;
-  private String lastname;
-       
+  @Condition(type=Condition.Type.CONTAINING)  private String lastname;
+  private String fullName;
+  @Conditions({@Condition, @Condition(type=Condition.Type.CONTAINING,properties = "fuzzyName")})
+  private String fullName;
+  @Transient
+  private String fuzzyName;
+  @Column(name = "usertype")
+  private String status;
   // Getters and setters
   // (Firstname, Lastname)-constructor and noargs-constructor
   // equals / hashcode
 }
 
 ```
+When using findAll method of MybatisRepository the @Condition or @Conditions annotations will work
+
 
 Create a repository interface in `com.example.repositories`:
 
 ```java
-public interface UserRepository extends CrudRepository<User, Long> {
+public interface UserRepository extends MybatisRepository<User, Long> {
   List<User> findByLastname(String lastname);  
+  
+  @Query("select firstname from user")
+  List<String> findUsersFirstName();
   
 }
 
@@ -146,14 +144,15 @@ add the jar through Maven:
    ```xml
    <dependency>
        <groupId>com.ifrabbit</groupId>
-       <artifactId>spring-boot-mybatis-boot-starter</artifactId>
-       <version>2.0.0.BUILD-SNAPSHOT</version>
+       <artifactId>spring-data-mybatis-boot-starter</artifactId>
+       <version>2.0.0.RELEASE</version>
    </dependency>
    ```
 
-If you need custom Mapper, you should add property in your application.properties like this:
+If you need custom Mapper, you should add property in your application.yml like this:
 ```
-spring.data.mybatis.mapper-locations=classpath*:/org/springframework/data/mybatis/samples/mappers/*Mapper.xml
+mybatis:
+  mapper-locations: "classpath*:/mapper/**/**Mapper.xml"
 ```
 
 And you need not to define SqlSessionFactory manually.
@@ -183,6 +182,7 @@ interface ReservationRepository extends MybatisRepository<Reservation, Long> {
 }
 
 @Entity
+@Table(name = "user")
 class Reservation extends LongId {
 
     private String reservationName;
